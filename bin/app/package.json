@@ -1,0 +1,17 @@
+{
+  "name": "sft-audit-events-splunk",
+  "version": "1.0.0",
+  "description": "A modular input for Splunk that retrieves audit events from the ScaleFT API and indexes them.",
+  "main": "sft-audit-events.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "private": true,
+  "author": "Justin Gallardo <justin.gallardo@scaleft.com>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "async": "^2.0.0-rc.5",
+    "request": "^2.72.0",
+    "splunk-sdk": "^1.8.0"
+  }
+}

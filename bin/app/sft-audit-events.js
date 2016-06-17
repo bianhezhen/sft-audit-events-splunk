@@ -24,7 +24,7 @@
     this.clientKey = clientKey;
     this.clientSecret = clientSecret;
     this.checkPointDir = checkpointDir;
-    this.lastIndexTime = null;
+    this.lastIndexTime = 0;
 
     if (instanceAddress.lastIndexOf('/') === instanceAddress.length - 1) {
       this.instanceAddr = instanceAddress.slice(0, -1);
@@ -76,6 +76,7 @@
       getEvents: ['refreshToken', function(results, callback) {
         request({
           uri: self.getRequestUri('/audits'),
+          qs: { descending: '1' },
           method: 'GET',
           json: true,
           auth: {
@@ -284,10 +285,15 @@
         getEvents: sftInput.getEvents.bind(sftInput),
 
         emitToSplunk: ['getEvents', function (results, callback) {
-          var evts = results.getEvents;
+          var evts = results.getEvents,
+              indexTime = null;
 
           evts.forEach(function (ev) {
             var evDate = new Date(ev.timestamp).getTime();
+
+            if (!indexTime) {
+              indexTime = evDate;
+            }
 
             if (evDate <= sftInput.lastIndexTime) {
               return;
@@ -300,12 +306,12 @@
 
             try {
               eventWriter.writeEvent(newEv);
-              sftInput.lastIndexTime = new Date(ev.timestamp).getTime();
             } catch (e) {
               Logger.error(name, e.message);
             }
           });
 
+          sftInput.lastIndexTime = indexTime;
           sftInput.saveCheckpoint(sftInput.lastIndexTime);
           callback();
         }]

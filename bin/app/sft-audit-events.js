@@ -17,6 +17,14 @@
 
   var INPUT_NAME = 'sft-audit-events';
 
+  /**
+   * The ScaleftInput object does most of the work for us.
+   *  * Authentication
+   *  * Polling
+   *  * Event submission
+   *  * Validation
+   *  * State management
+   */
   var ScaleftInput = function(teamName, instanceAddress, clientKey, clientSecret, checkpointDir) {
     this.token = "";
     this.tokenExpiration = 0;
@@ -33,6 +41,9 @@
     }
   };
 
+  /**
+   * Checks to see if the auth token we have is valid. If it is not, attempt to get a new auth token.
+   */
   ScaleftInput.prototype.refreshToken = function(callback) {
     var self = this;
 
@@ -64,10 +75,21 @@
     });
   };
 
+  /**
+   * Helper function for returning the base URI for an API request.
+   */
   ScaleftInput.prototype.getRequestUri = function(path) {
     return this.instanceAddr + util.format('/v1/teams/%s%s', this.teamName, path);
   };
 
+  /**
+   * Return a set of audit events from the ScaleFT API.
+   * It follows this workflow:
+   *  * Make sure we have a valid auth token from the ScaleFT API.
+   *  * Makes a request to the ScaleFT API for the last 100 audit events.
+   *
+   * FIXME(jirwin): Only request audit events that have happened since the last time we've polled.
+   */
   ScaleftInput.prototype.getEvents = function(callback) {
     var self = this;
 
@@ -101,6 +123,9 @@
     });
   };
 
+  /**
+   * Helper function that returns a readable name for each actor type.
+   */
   ScaleftInput.prototype.getActorType = function(actorType) {
     switch (actorType.toUpperCase()) {
       case 'T':
@@ -118,6 +143,9 @@
     }
   };
 
+  /**
+   * A helper function that returns a parsed actor string.
+   */
   ScaleftInput.prototype.formatActor = function(actorString) {
     var self = this,
         actorSplit = actorString.split(' ');
@@ -130,6 +158,9 @@
     }, {});
   };
 
+  /**
+   * A helper function that formats events.
+   */
   ScaleftInput.prototype.formatEvent = function(ev) {
     var self = this,
         ret = {
@@ -144,6 +175,9 @@
     return ret;
   };
 
+  /**
+   * Returns the path to the checkpoint file.
+   */
   ScaleftInput.prototype.getCheckpointPath = function() {
     var shasum = crypto.createHash('sha1');
 
@@ -152,10 +186,17 @@
     return path.join(this.checkPointDir, INPUT_NAME, shasum.digest('hex'));
   };
 
+  /**
+   * Saves the provided timestamp to the checkpoint file.
+   */
   ScaleftInput.prototype.saveCheckpoint = function(timestamp) {
     fs.writeFileSync(this.getCheckpointPath(), timestamp);
   };
 
+  /**
+   * Returns a timestamp loaded from the checkpoint file.
+   * If the checkpoint file can't be read or is invalid, return false.
+   */
   ScaleftInput.prototype.loadCheckpoint = function() {
     var ts = null;
     try {
@@ -171,6 +212,9 @@
     return ts;
   };
 
+  /**
+   * Returns the scheme for the input's configuration.
+   */
   exports.getScheme = function () {
     var scheme = new Scheme("ScaleFT Audit Event Input")
 
@@ -231,6 +275,9 @@
     return scheme;
   };
 
+  /**
+   * Validation for config settings.
+   */
   exports.validateInput = function(definition, done) {
     var teamName = definition.parameters.team_name.toString().toLowerCase(),
         instanceAddr = definition.parameters.instance_address.toString(),
@@ -261,6 +308,9 @@
     done();
   };
 
+  /**
+   * This method actually retrieves audit events and inputs them into splunk.
+   */
   exports.streamEvents = function(name, singleInput, eventWriter, done) {
     var pollingInterval = parseInt(singleInput.polling_interval, 10),
         sftInput = new ScaleftInput(

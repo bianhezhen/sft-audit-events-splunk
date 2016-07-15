@@ -96,9 +96,17 @@
     async.auto({
       refreshToken: this.refreshToken.bind(this),
       getEvents: ['refreshToken', function(results, callback) {
+        var qs = {
+          descending: '1'
+        };
+
+        if (self.lastIndexTime) {
+          qs.after_time = self.lastIndexTime
+        }
+
         request({
           uri: self.getRequestUri('/audits'),
-          qs: { descending: '1' },
+          qs: qs,
           method: 'GET',
           json: true,
           auth: {
@@ -190,7 +198,7 @@
    * Saves the provided timestamp to the checkpoint file.
    */
   ScaleftInput.prototype.saveCheckpoint = function(timestamp) {
-    fs.writeFileSync(this.getCheckpointPath(), timestamp);
+    fs.writeFileSync(this.getCheckpointPath(), timestamp.toString());
   };
 
   /**
@@ -200,12 +208,12 @@
   ScaleftInput.prototype.loadCheckpoint = function() {
     var ts = null;
     try {
-      var ts = parseInt(fs.readFileSync(this.getCheckpointPath()), 10);
+      var ts = new Date(fs.readFileSync(this.getCheckpointPath()));
     } catch (e) {
       return false
     }
 
-    if (isNaN(ts)) {
+    if (isNaN(ts.getTime())) {
       return false
     }
 
@@ -338,8 +346,13 @@
           var evts = results.getEvents,
               indexTime = null;
 
+          if (!evts) {
+            callback();
+            return;
+          }
+
           evts.forEach(function (ev) {
-            var evDate = new Date(ev.timestamp).getTime();
+            var evDate = new Date(ev.timestamp);
 
             if (!indexTime) {
               indexTime = evDate;

@@ -87,8 +87,6 @@
    * It follows this workflow:
    *  * Make sure we have a valid auth token from the ScaleFT API.
    *  * Makes a request to the ScaleFT API for the last 100 audit events.
-   *
-   * FIXME(jirwin): Only request audit events that have happened since the last time we've polled.
    */
   ScaleftInput.prototype.getEvents = function(callback) {
     var self = this;
@@ -227,7 +225,7 @@
     var scheme = new Scheme("ScaleFT Audit Event Input")
 
     scheme.description = "A modular input that retrieves audit events from ScaleFT's API.";
-    scheme.useExternalValidation = false;
+    scheme.useExternalValidation = true;
     scheme.useSingleInstance = false;
 
     scheme.args = [
@@ -236,7 +234,7 @@
         dataType:  Argument.dataTypeString,
         description: "The ScaleFT team name to receive audit logs from.",
         requiredOnCreate: true,
-        requiredOnEdit: false
+        requiredOnEdit: true
       }),
 
       new Argument({
@@ -244,7 +242,7 @@
         dataType: Argument.dataTypeString,
         description: "The address to the instance of ScaleFT to use.",
         requiredOnCreate: true,
-        requiredOnEdit: false
+        requiredOnEdit: true
       }),
 
       new Argument({
@@ -252,7 +250,7 @@
         dataType: Argument.dataTypeNumber,
         description: "The number of seconds to wait before polling for new audit events. Defaults to 60.",
         requiredOnCreate: true,
-        requiredOnEdit: false
+        requiredOnEdit: true
       }),
 
       new Argument({
@@ -260,7 +258,7 @@
         dataType: Argument.dataTypeString,
         description: "The client key for your ScaleFT service user.",
         requiredOnCreate: true,
-        requiredOnEdit: false
+        requiredOnEdit: true
       }),
 
       new Argument({
@@ -268,7 +266,7 @@
         dataType: Argument.dataTypeString,
         description: "The client secret for your ScaleFT service user.",
         requiredOnCreate: true,
-        requiredOnEdit: false
+        requiredOnEdit: true
       }),
 
       new Argument({
@@ -276,7 +274,7 @@
         dataType: Argument.dataTypeString,
         description: "The path to a directory to hold modular input state. Typically $SPLUNK_DB/modinputs/",
         requiredOnCreate: true,
-        requiredOnEdit: false
+        requiredOnEdit: true
       })
     ];
 
@@ -293,7 +291,7 @@
         interval = parseInt(definition.parameters.polling_interval, 10),
         teamNameRegex = /^[\w\-_.]+$/;
 
-    if (!teamNameRegex.match(teamName)) {
+    if (!teamName.match(teamNameRegex)) {
       done(new Error("Team names must match regular expression ^[\w\-_.]+$"));
       return;
     }
@@ -308,8 +306,15 @@
       return;
     }
 
-    if (!url.parse(instanceAddr).hostname) {
+    var parsedInstanceAddr = url.parse(instanceAddr);
+
+    if (!parsedInstanceAddr.hostname) {
       done(new Error("Instance address does not appear to be a valid URL."));
+      return;
+    }
+
+    if (parsedInstanceAddr.protocol !== 'https:') {
+      done(new Error("Instance address is not an https url."));
       return;
     }
 

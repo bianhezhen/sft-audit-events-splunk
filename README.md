@@ -6,11 +6,15 @@ You can help make this app better by contributing at [Github](https://www.github
 
 # Getting Started
 
+### Prerequisites
+This modular input uses and requires NodeJS versions 0.8.0 or greater(v4.4.7 suggested). Please visit the official [NodeJS website](https://nodejs.org/en/download/) for instructions on how to download and install NodeJS.
+
 ### New Install
 1. Create a new service user in the [ScaleFT webapp](https://app.scaleft.com).
 2. Create an API key for the new service user. Be sure to take note of the client id and client secret for your new API key.
 3. Add your service user to a group, and be sure it has at least the 'Reporting' permission.
 4. Install via the Splunk webapp (recommended) or copy the sft-audit-events-splunk app directory into `$SPLUNK_HOME/etc/apps/` location.
+5. Install the NodeJS dependencies by running `npm install` inside the `$SPLUNK_HOME/etc/apps/sft-audit-events/bin/app` directory.
 5. Restart the Splunk server.
 6. Go to the Splunk "Data Input" settings, and create a new "ScaleFT Audit Event Input" local input.
 7. Be sure to configure your new input correctly:
@@ -23,7 +27,16 @@ You can help make this app better by contributing at [Github](https://www.github
     * `checkpoint_dir`: The directory to store any checkpoint data for the app. This can be anything, but `$SPLUNK_DB/modinputs/` will let splunk manage the data.
 8. Enjoy!
 
+### Dependencies
+This modular input depends on a couple of npm modules:
+  1. [request](https://www.npmjs.com/package/request) - [Apache 2.0](http://spdx.org/licenses/Apache-2.0)
+  2. [async](https://www.npmjs.com/package/async) - [MIT](http://spdx.org/licenses/MIT)
+  3. [splunk-sdk](https://www.npmjs.com/package/splunk-sdk) - [Apache 2.0](http://spdx.org/licenses/Apache-2.0)
+
 # Whats New
+
+### 1.0.1
+ - Fixed packaging issue.
 
 ### 1.0.0
  - Initial version of the app. Supports grabbing audit events from the ScaleFT using a service user.

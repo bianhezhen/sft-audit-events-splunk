@@ -12,6 +12,6 @@
   "dependencies": {
     "async": "^2.0.0-rc.5",
     "request": "^2.72.0",
-    "splunk-sdk": "^1.8.0"
+    "splunk-sdk": "^1.8.1"
   }
 }

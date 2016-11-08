@@ -34,6 +34,17 @@ This modular input depends on a couple of npm modules:
 
 # Whats New
 
+### 1.0.4
+ - Set minimum required version of Node.js to v4.0.0
+ - Vendored Node.js dependencies.
+
+### 1.0.3
+ - Bumped splunk-sdk to v1.8.1
+
+### 1.0.2
+ - Fixed input validation.
+ - Added dependencies to README.
+
 ### 1.0.1
  - Fixed packaging issue.
 

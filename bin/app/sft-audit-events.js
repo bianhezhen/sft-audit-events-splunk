@@ -70,7 +70,7 @@
       }
 
       self.token = body.bearer_token;
-      self.tokenExpiration = Date.now() + 60 * 600 * 1000; // The token expires in 1 hour.
+      self.tokenExpiration = Date.now() + 60 * 60 * 1000; // The token expires in 1 hour.
       callback();
     });
   };

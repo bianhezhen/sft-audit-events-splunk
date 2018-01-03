@@ -34,6 +34,10 @@ This modular input depends on a couple of npm modules:
 
 # Whats New
 
+### 1.0.5
+ - Fix bug that caused the most recent audit event to be duplicated in splunk
+ - Fix bug where service_token would not be refreshed for 10 hours, despite expiring after 1 hour
+
 ### 1.0.4
  - Set minimum required version of Node.js to v4.0.0
  - Vendored Node.js dependencies.

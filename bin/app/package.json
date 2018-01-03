@@ -1,6 +1,6 @@
 {
   "name": "sft-audit-events-splunk",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A modular input for Splunk that retrieves audit events from the ScaleFT API and indexes them.",
   "main": "sft-audit-events.js",
   "scripts": {

@@ -70,7 +70,7 @@
       }
 
       self.token = body.bearer_token;
-      self.tokenExpiration = Date.now() + 60 * 600 * 1000; // The token expires in 1 hour.
+      self.tokenExpiration = Date.now() + 60 * 60 * 1000; // The token expires in 1 hour.
       callback();
     });
   };
@@ -206,13 +206,17 @@
   ScaleftInput.prototype.loadCheckpoint = function() {
     var ts = null;
     try {
-      var ts = new Date(fs.readFileSync(this.getCheckpointPath()));
+      ts = new Date(fs.readFileSync(this.getCheckpointPath()));
     } catch (e) {
       return false
     }
 
     if (isNaN(ts.getTime())) {
-      return false
+      var parsed = parseInt(fs.readFileSync(this.getCheckpointPath()), 10);
+      if (isNaN(parsed)) {
+        return false
+      }
+      ts = new Date(parsed);
     }
 
     return ts;
@@ -363,7 +367,7 @@
               indexTime = evDate;
             }
 
-            if (evDate <= sftInput.lastIndexTime) {
+            if (evDate.getTime() <= sftInput.lastIndexTime.getTime()) {
               return;
             }
 
@@ -380,7 +384,7 @@
           });
 
           sftInput.lastIndexTime = indexTime;
-          sftInput.saveCheckpoint(sftInput.lastIndexTime);
+          sftInput.saveCheckpoint(sftInput.lastIndexTime.getTime());
           callback();
         }]
       }, function (err) {
